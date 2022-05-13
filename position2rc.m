@@ -1,5 +1,5 @@
-function  [r,c]=position2rc(position)
-         n=20;
+function  [r,c]=position2rc(position,n)
+%          n=20;
          if mod(position,n)==0
              r=n;
          else

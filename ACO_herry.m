@@ -36,6 +36,7 @@ Q=100;         %%信息素增加强度系数
 Tau=ones(n,n);     %Tau为信息素矩阵
 NC=1;               %迭代计数器，记录迭代次数
 r_e=1;  c_e=20;%地图终点在矩阵中的位置%可以通过position2rc函数产生
+% r_e=n;  c_e=1;%地图终点在矩阵中的位置%可以通过position2rc函数产生
 s=n;%路径起始点在矩阵中的位置
 position_e=n*(n-1)+1;%路径终点在矩阵中的位置
 min_PL_NC_ant=inf;%%蚂蚁最短的行进距离
@@ -58,10 +59,10 @@ Tau=10.*Tau;
 %Tau=10.*Eta;%%%%%创新点%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%计算移动矩阵
- D_move=zeros(n*n,8);%%D_move每一行代表与行标对应元素，（400个节点）可以前往的下一个节点的位置
+ D_move=zeros(n*n,8);%获取每个节点的周围节点%D_move每一行代表与行标对应元素，（400个节点）可以前往的下一个节点的位置
  for point=1:n*n
      if G(point)==0
-         [r,c]=position2rc(point);
+         [r,c]=position2rc(point,n);
          move=1;
          for k=1:n%此处可优化
              for m1=1:n
@@ -103,7 +104,7 @@ while NC<=NC_max
         while current_position~=position_e&&len_D_work>=1%%当前点是否为终点或者走进死胡同
             p=zeros(1,len_D_work);
             for j1=1:len_D_work
-                [r1,c1]=position2rc(D_work(j1));%%利用自己编的函数把可以前进的点计算为行列表示
+                [r1,c1]=position2rc(D_work(j1),n);%%利用自己编的函数把可以前进的点计算为行列表示
                 p(j1)=(Tau(r1,c1)^Alpha)*(Eta(r1,c1)^Beta);%%%%计算每个可以前往的节点的概率
             end
             p=p/sum(p);%%%归一化
@@ -148,7 +149,7 @@ while NC<=NC_max
             tiaoshu=length(rout)-1;%%%找出到达终点蚂蚁前进的次数
             value_PL=PL(NC,ant);%%%%%%到达终点蚂蚁的行进距离
             for u=1:tiaoshu
-                [r3,c3]=position2rc(rout(u+1));
+                [r3,c3]=position2rc(rout(u+1),n);
                 delta_Tau(r3,c3)=delta_Tau(r3,c3)+Q/value_PL;%%%%计算信息素变量的值
             end
         end
