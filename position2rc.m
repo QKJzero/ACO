@@ -1,11 +1,11 @@
 function  [r,c]=position2rc(position,n)
 %          n=20;
          if mod(position,n)==0
-             r=n;
+             c=n;
          else
-             r=mod(position,n);
+             c=mod(position,n);
          end
-         c=ceil(position/n);
+         r=ceil(position/n);
 
 
 
