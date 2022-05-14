@@ -64,7 +64,7 @@ Tau=100.*Tau;
  for point=1:n*n
 %      disp(G(point));
      if(point>=2)
-             kkkk=1;
+%              kkkk=1;
              disp(G(point));
              [r,c]=position2rc(point,n);
              disp(G(r,c));
