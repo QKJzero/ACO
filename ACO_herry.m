@@ -4,8 +4,8 @@ close all;
 tic
 % g = rand(100,100);
 % G = round(g);
-G=[0 3 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0; 
-   2 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0; 
+G=[0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0; 
+   0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0; 
    0 0 0 0 0 0 1 1 1 0 1 1 1 1 1 1 1 1 0 0; 
    0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 1 0 0; 
    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0; 
@@ -29,17 +29,15 @@ G=[0 3 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0;
 n=size(G,1);%n表示地图大小
 m=50;    %% m 蚂蚁个数
 Alpha=2;  %% Alpha 表征信息素重要程度的参数
-Beta=1;  %% Beta 表征启发式因子重要程度的参数
+Beta=6;  %% Beta 表征启发式因子重要程度的参数
 Rho=0.5; %% Rho 信息素蒸发系数
 NC_max=100; %%最大迭代次数
 Q=100;         %%信息素增加强度系数
 Tau=ones(n,n);     %Tau为信息素矩阵
 NC=1;               %迭代计数器，记录迭代次数
 r_e=1;  c_e=20;%地图终点在矩阵中的位置%可以通过position2rc函数产生
-% s=n;%路径起始点在矩阵中的位置
-s=n*(n-1)+1;%路径起始点在矩阵中的位置
-% position_e=n*(n-1)+1;%路径终点在矩阵中的位置
- position_e=20;%路径终点在矩阵中的位置
+s=n;%路径起始点在矩阵中的位置
+position_e=n*(n-1)+1;%路径终点在矩阵中的位置
 min_PL_NC_ant=inf;%%蚂蚁最短的行进距离
 min_ant=0;%%最短行进距离的蚂蚁坐标
 min_NC=0;%%最短行进距离的迭代次数
@@ -56,28 +54,21 @@ for i=1:n
 end
 D(r_e,c_e)=0.05;
 Eta=1./D;          %Eta为启发因子，这里设为到终点距离的倒数
-Tau=100.*Tau;
+Tau=10.*Tau;
 %Tau=10.*Eta;%%%%%创新点%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%计算移动矩阵
- D_move=zeros(n*n,8);%获取每个节点的周围节点%D_move每一行代表与行标对应元素，（400个节点）可以前往的下一个节点的位置
+ D_move=zeros(n*n,8);%%D_move每一行代表与行标对应元素，（400个节点）可以前往的下一个节点的位置
  for point=1:n*n
-%      disp(G(point));
-     if(point>=2)
-             kkkk=1;
-             disp(G(point));
-             [r,c]=position2rc(point,n);
-             disp(G(r,c));
-     end
      if G(point)==0
-         [r,c]=position2rc(point,n);
+         [r,c]=position2rc(point);
          move=1;
          for k=1:n%此处可优化
              for m1=1:n
-                 im=abs(r-m1);
-                 jn=abs(c-k); 
+                 im=abs(r-k);
+                 jn=abs(c-m1); 
                  if im+jn==1||(im==1&&jn==1) 
-                     if G(m1,k)==0
+                     if G(k,m1)==0
                          D_move(point,move)=(m1-1)*n+k;%序号数，最多8个即周围八个节点。
                          move=move+1;
                      end
@@ -112,7 +103,7 @@ while NC<=NC_max
         while current_position~=position_e&&len_D_work>=1%%当前点是否为终点或者走进死胡同
             p=zeros(1,len_D_work);
             for j1=1:len_D_work
-                [r1,c1]=position2rc(D_work(j1),n);%%利用自己编的函数把可以前进的点计算为行列表示
+                [r1,c1]=position2rc(D_work(j1));%%利用自己编的函数把可以前进的点计算为行列表示
                 p(j1)=(Tau(r1,c1)^Alpha)*(Eta(r1,c1)^Beta);%%%%计算每个可以前往的节点的概率
             end
             p=p/sum(p);%%%归一化
@@ -121,7 +112,7 @@ while NC<=NC_max
             to_visit=D_work(select(1));%%%前往下一个节点
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%到达下一个节点%%%%%%%%%%%%%%%%%%%%%%%%
             path=[path,to_visit];%%%路径累加
-            dis=distance(current_position,to_visit,n);%%%计算到下个节点的距离
+            dis=distance(current_position,to_visit);%%%计算到下个节点的距离
             PL_NC_ant=PL_NC_ant+dis;%%距离累加
             current_position=to_visit;%%%当前点设为前往点
             D_work=D_D(current_position,:);%%%%把当前节点可以前往的下一个节点的信息传给D_work
@@ -157,7 +148,7 @@ while NC<=NC_max
             tiaoshu=length(rout)-1;%%%找出到达终点蚂蚁前进的次数
             value_PL=PL(NC,ant);%%%%%%到达终点蚂蚁的行进距离
             for u=1:tiaoshu
-                [r3,c3]=position2rc(rout(u+1),n);
+                [r3,c3]=position2rc(rout(u+1));
                 delta_Tau(r3,c3)=delta_Tau(r3,c3)+Q/value_PL;%%%%计算信息素变量的值
             end
         end
